@@ -1,15 +1,10 @@
-// Define field boundaries
-// (May be done manually or through asset import)
-var geometry = /* color: #d63000 */ee.Geometry.Polygon(
-        [[[3.2081583779475498, 45.79060188557359],
-          [3.2081154626033115, 45.79015302186804],
-          [3.2096604149958896, 45.79006324869316],
-          [3.211677436175089, 45.795449383255686],
-          [3.2100895684382724, 45.795688754932435],
-          [3.2069138329646396, 45.7906916578809]]]);
+// Carga la geometría
+var geometry = ee.FeatureCollection('projects/ee-efren/assets/ambito_pdu_anta');
 
 // Apply negative buffer to geometry
-var geometryBuff = geometry.buffer(-20)
+var geometryBuff = geometry.map(function(feature) {
+  return feature.buffer(-20);
+});
 
 // Add plot and buffer to the map
 // and specify fill color and layer name
@@ -23,9 +18,9 @@ Map.centerObject(geometry);
 // (choose SR for atmospheric corrections to surface reflectance)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR') 
   // Remove cloudy images from the collection
-  .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 20)
+  .filterMetadata('CLOUDY_PIXEL_PERCENTAGE', 'less_than', 30)
   // Filter to study period
-  .filterDate('2019-09-01', '2020-10-01')
+  .filterDate('2019-01-01', '2019-12-31')
   // Filter to plot boundaries
   .filterBounds(geometryBuff);
   
@@ -133,9 +128,8 @@ Map.addLayer(
 // Export aspect raster, specifying scale and region.
 Export.image.toDrive({
   image: NDVImed,
-  description: 'ndvi_tourettes',
+  description: 'ndvi_anta_2019',
   scale: 10,
   region: geometryBuff
 });
   
-
